@@ -24,6 +24,9 @@ func main() {
 			DbName:   "dts-microservice",
 			Config:   "charset=utf8&parseTime=True*local=Local",
 		},
+		Auth: config.AuthService{
+			Host: "localhost:5001",
+		},
 	}
 
 	db, err = initDB(con.Database)
@@ -42,7 +45,7 @@ func main() {
 		Db: db,
 	}
 
-	router.Handle("/add-menu", http.HandlerFunc(menuHandler.AddMenu))
+	// router.Handle("/add-menu", http.HandlerFunc(menuHandler.AddMenu))
 	router.Handle("/add-menu", authMiddleware.ValidateAuth(http.HandlerFunc(menuHandler.AddMenu)))
 	router.Handle("/menu", http.HandlerFunc(menuHandler.GetAllMenu))
 
