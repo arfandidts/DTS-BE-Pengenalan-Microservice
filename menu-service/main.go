@@ -15,21 +15,21 @@ import (
 
 func main() {
 	con := config.Config{
-		Database: config.Config{
+		Database: config.Database{
 			Driver:   "mysql",
 			Host:     "localhost",
 			Port:     "3306",
 			User:     "root",
 			Password: "",
-			DbName:   "dts-microservice",
-			Config:   "charset=utf8&parseTime=True*local=Local",
+			DbName:   "dts_microservice",
+			Config:   "charset=utf8&parseTime=True&loc=Local",
 		},
-		Auth: config.AuthService{
+		AuthService: config.AuthService{
 			Host: "http://localhost:5001",
 		},
 	}
 
-	db, err = initDB(con.Database)
+	db, err := initDB(con.Database)
 	if err != nil {
 		log.Panic(err)
 		return
@@ -41,7 +41,7 @@ func main() {
 		AuthService: con.AuthService,
 	}
 
-	menuHandler := handler.MenuHandler{
+	menuHandler := handler.Menu{
 		Db: db,
 	}
 

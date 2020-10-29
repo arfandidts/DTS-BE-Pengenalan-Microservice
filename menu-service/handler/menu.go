@@ -15,31 +15,32 @@ type Menu struct {
 }
 
 // AddMenuHandler handle add menu
-func (handler *MenuHandler) AddMenu(w http.ResponseWriter, r *http.Request) {
+func (handler *Menu) AddMenu(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		utils.WrapAPISucces(w, r, http.Status(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		utils.WrapAPISuccess(w, r, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
 	if err != nil {
-		utils.WrapAPISucces(w, r, "succes", http.StatusInternalServerError)
+		utils.WrapAPIError(w, r, "can't read body", http.StatusBadRequest)
 		return
 	}
 
 	var menu database.Menu
-	err := json.Unmarshal(body, menu)
+	err = json.Unmarshal(body, &menu)
 	if err != nil {
-		utils.WrapAPISucces(w, r, "succes", http.StatusInternalServerError)
+		utils.WrapAPIError(w, r, "error unmarshal : "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	err = menu.Insert(handler.Db)
 	if err != nil {
-		utils.WrapAPISucces(w, r, "succes", http.StatusInternalServerError)
+		utils.WrapAPIError(w, r, "insert menu error : "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	utils.WrapAPISucces(w, r, "succes", http.StatusOK)
+	utils.WrapAPISuccess(w, r, "success", 200)
 }
 
 func (menu *Menu) GetAllMenu(w http.ResponseWriter, r *http.Request) {
