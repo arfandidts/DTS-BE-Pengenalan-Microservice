@@ -34,11 +34,16 @@ func main() {
 
 	router := mux.NewRouter()
 
+	authMiddleware := handler.AuthMiddleware{
+		AuthService: con.AuthService,
+	}
+
 	menuHandler := handler.MenuHandler{
 		Db: db,
 	}
 
 	router.Handle("/add-menu", http.HandlerFunc(menuHandler.AddMenu))
+	router.Handle("/add-menu", authMiddleware.ValidateAuth(http.HandlerFunc(menuHandler.AddMenu)))
 	router.Handle("/menu", http.HandlerFunc(menuHandler.GetAllMenu))
 
 	fmt.Println("Menu service listen on port :5000")
