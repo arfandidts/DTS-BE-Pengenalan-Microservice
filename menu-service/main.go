@@ -34,7 +34,12 @@ func main() {
 
 	router := mux.NewRouter()
 
-	router.Handle("/add-menu", http.HandlerFunc(handler.AddMenu))
+	menuHandler := handler.MenuHandler{
+		Db: db,
+	}
+
+	router.Handle("/add-menu", http.HandlerFunc(menuHandler.AddMenu))
+	router.Handle("/menu", http.HandlerFunc(menuHandler.GetAllMenu))
 
 	fmt.Println("Menu service listen on port :5000")
 	log.Panic(http.ListenAndServe(":5000", router))
@@ -52,6 +57,8 @@ func initDB(dbConfig config.Database) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println("Connected to DB")
 
 	return db, nil
 }

@@ -1,23 +1,60 @@
 package handler
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
+	"github.com/arfandidts/dts-be-pengenalan-microservice/menu-service/database"
 	"github.com/arfandidts/dts-be-pengenalan-microservice/utils"
+	"gorm.io/gorm"
 )
 
-func AddMenu(w http.ResponseWriter, r *http.Request) {
-	// response, err := json.Marshal(map[string]interface{}{
-	// 	"success": true,
-	// })
+type Menu struct {
+	Db *gorm.DB
+}
 
-	// if err != nil {
-	// 	fmt.Print("Failed to generate response")
-	// 	return
-	// }
+// AddMenuHandler handle add menu
+func (handler *MenuHandler) AddMenu(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		utils.WrapAPISucces(w, r, http.Status(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+	}
 
-	// w.Write(response)
-	// Karena diatas terlalu panjang untuk setiap endpoint maka, dibuat
-	// Wrapper mengatasi setiap response yang didapat
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		utils.WrapAPISucces(w, r, "succes", http.StatusInternalServerError)
+		return
+	}
+
+	var menu database.Menu
+	err := json.Unmarshal(body, menu)
+	if err != nil {
+		utils.WrapAPISucces(w, r, "succes", http.StatusInternalServerError)
+		return
+	}
+
+	err = menu.Insert(handler.Db)
+	if err != nil {
+		utils.WrapAPISucces(w, r, "succes", http.StatusInternalServerError)
+		return
+	}
+
 	utils.WrapAPISucces(w, r, "succes", http.StatusOK)
+}
+
+func (menu *Menu) GetAllMenu(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		utils.WrapAPIError(w, r, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+
+	menuDb := database.Menu{}
+
+	menus, err := menuDb.GetAll(menu.Db)
+	if err != nil {
+		utils.WrapAPIError(w, r, "failed get menu:"+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	utils.WrapAPIData(w, r, menus, 200, "success")
 }
